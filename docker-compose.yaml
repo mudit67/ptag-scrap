@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  ptag-scrap:
+    build: ./
+    image: ptag-scrap
+    container_name: ptag-con
+    ports:
+      - "3000:3000"
+      - "8000:8000"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    # command: tail -F README.md
+
