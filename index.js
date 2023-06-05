@@ -7,7 +7,7 @@ const Tags = str.split(",");
 import fetch from "node-fetch";
 // const cheerio = require("cheerio");
 import * as cheerio from "cheerio";
-
+let lastLink;
 const getLinks = (htmlText) => {
   let urlHtml = cheerio.load(htmlText);
   let vidUrls = [];
@@ -33,6 +33,7 @@ function checkLink(link) {
       });
     if (Tags.every((e) => vidTags.indexOf(e) >= 0)) {
       // console.log(link, vidTags);
+      lastLink = link;
       resolve(link);
       return link;
     }
@@ -41,14 +42,22 @@ function checkLink(link) {
 }
 
 for (let i = 1; i <= Infinity; i += 1) {
-  const pageHtmlText = await fetch(`${URL}/&page=${i}`).then((data) =>
+  let currentPageUrl = "";
+  if (
+    URL.includes("search") ||
+    URL.includes("model") ||
+    URL.includes("channel")
+  ) {
+    currentPageUrl = `${URL}/&page=${i}`;
+  } else {
+    currentPageUrl = `${URL}/${i}`;
+  }
+  const pageHtmlText = await fetch(`${currentPageUrl}`).then((data) =>
     data.text()
   );
 
   let Urls = getLinks(pageHtmlText);
-  if (Urls.length == 0) {
-    break;
-  }
+
   let filteredLinks = await Promise.all(
     Urls.map((url) => {
       {
@@ -59,7 +68,16 @@ for (let i = 1; i <= Infinity; i += 1) {
   filteredLinks = filteredLinks.filter((link) => {
     return link !== false;
   });
-  console.log(filteredLinks.join("\n"));
+  if (filteredLinks.length) {
+    console.log(filteredLinks.join("\n"));
+  }
+  if (
+    Urls.length == 0
+    //  ||
+    //  Urls.at(-1) == lastLink
+  ) {
+    break;
+  }
 }
 // fetch(URL)
 //   .then((a) => a.text())
