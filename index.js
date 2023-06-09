@@ -1,12 +1,23 @@
 // require("dotenv").config();
 import * as dotenv from "dotenv";
-dotenv.config();
-const URL = process.env.URL;
-const str = process.env.TAGS;
-const Tags = str.split(",");
 import fetch from "node-fetch";
 // const cheerio = require("cheerio");
 import * as cheerio from "cheerio";
+dotenv.config();
+import * as metaData_ from "./config/meta.json" assert { type: "json" };
+let metaData = JSON.parse(JSON.stringify(metaData_));
+metaData = metaData.default;
+// console.log(`data: ${JSON.stringify(data)}`);
+// const metaData = require("./config/meta.json");
+// import "./config/meta.json" as metaData;
+// fetch("./config/meta.json")
+//   .then((res) => res.json())
+//   .then(async (metaData) => {
+console.log(`metaData: ${JSON.stringify(metaData)}`);
+
+const URL = metaData.URL;
+// const str = process.env.TAGS;
+const Tags = metaData.Tags;
 let lastLink;
 const getLinks = (htmlText) => {
   let urlHtml = cheerio.load(htmlText);
@@ -80,28 +91,5 @@ for (let i = 1; i <= Infinity; i += 1) {
     break;
   }
 }
-// fetch(URL)
-//   .then((a) => a.text())
-//   .then(async (htmlText) => {
-//     let Urls = getLinks(htmlText);
-//     // let filteredLinks = Promise.all(Urls.map((url) => filterLink(url)))
-//     // let filteredLinks = Urls.filter(async function(url){
 
-//     // });
-//     // .filter(
-//     //   (i) => !!i
-//     // );
-//     // console.log("filtered links: ", filteredLinks);
-
-//     let filteredLinks = await Promise.all(
-//       Urls.map((url) => {
-//         {
-//           return checkLink(url);
-//         }
-//       })
-//     );
-//     filteredLinks = filteredLinks.filter((link) => {
-//       return link !== false;
-//     });
-//     console.log("filterLinksL: ", filteredLinks);
-//   });
+// });
