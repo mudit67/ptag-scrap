@@ -5,18 +5,37 @@ import fetch from "node-fetch";
 import * as cheerio from "cheerio";
 dotenv.config();
 import * as metaData_ from "./config/meta.json" assert { type: "json" };
+import * as linksJson_ from "./data/links.json" assert { type: "json" };
+import * as fs from "fs";
 let metaData = JSON.parse(JSON.stringify(metaData_));
 metaData = metaData.default;
-// console.log(`data: ${JSON.stringify(data)}`);
-// const metaData = require("./config/meta.json");
-// import "./config/meta.json" as metaData;
-// fetch("./config/meta.json")
-//   .then((res) => res.json())
-//   .then(async (metaData) => {
-console.log(`metaData: ${JSON.stringify(metaData)}`);
+let linksJson = JSON.parse(JSON.stringify(linksJson_));
+linksJson = linksJson.default;
+let linksObj, objIndex;
+let foundLinksObj = linksJson.filter((obj, index) => {
+  if (
+    obj.URL == metaData.URL &&
+    metaData.Tags.every(
+      (i) => obj.Tags.includes(i) && metaData.Tags.length == obj.Tags.length
+    )
+  ) {
+    objIndex = index;
+    return true;
+  }
+});
+if (foundLinksObj && foundLinksObj.length) {
+  console.log("Links objext found");
+  linksObj = foundLinksObj[0];
+} else {
+  console.log("Links object not found");
+  objIndex = linksJson.length;
+  linksObj = { URL: metaData.URL, Tags: metaData.Tags, links: [] };
+  // console.log(Array.isArray(linksObj));
+}
+
+console.log(metaData, "\n\n\n");
 
 const URL = metaData.URL;
-// const str = process.env.TAGS;
 const Tags = metaData.Tags;
 let lastLink;
 const getLinks = (htmlText) => {
@@ -43,8 +62,7 @@ function checkLink(link) {
         return $el.text().trim();
       });
     if (Tags.every((e) => vidTags.indexOf(e) >= 0)) {
-      // console.log(link, vidTags);
-      link = `\t\t ${link} \n`;
+      // link = `${link}`;
       lastLink = link;
       resolve(link);
       return link;
@@ -81,7 +99,34 @@ for (let i = 1; i <= Infinity; i += 1) {
     return link !== false;
   });
   if (filteredLinks.length) {
-    console.log(filteredLinks.join("\n"));
+    if (!filteredLinks.every((i) => linksObj.links.includes(i))) {
+      // console.log("New Links found: ");
+      let links = [...linksObj.links, ...filteredLinks];
+      links = links.filter((i, index) => links.indexOf(i) == index);
+      linksObj = { ...linksObj, links: links };
+      linksJson[objIndex] = linksObj;
+      // console.log(
+      // "🚀 ~ file: index.js:104 ~ linksJson:"
+      // linksJson,
+      // Array.isArray(linksJson)
+      // );
+
+      // fs.writeFileSync("./data/links.json", JSON.stringify(linksJson));
+      fs.writeFile("./data/links.json", JSON.stringify(linksJson), (err) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        // console.log("No error found!");
+      });
+    } else {
+      // console.log(
+      //   "No new links found!",
+      //   linksObj.links,
+      //   linksObj.links.every((i) => filteredLinks.includes(i))
+      // );
+    }
+    console.log("\t\t", filteredLinks.join("\n\t\t"));
   }
   if (
     Urls.length == 0
