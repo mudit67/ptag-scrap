@@ -7,10 +7,12 @@ dotenv.config();
 import * as metaData_ from "./config/meta.json" assert { type: "json" };
 import * as linksJson_ from "./data/links.json" assert { type: "json" };
 import * as fs from "fs";
+// console.log("Raw links: ",linksJson_);
 let metaData = JSON.parse(JSON.stringify(metaData_));
 metaData = metaData.default;
 let linksJson = JSON.parse(JSON.stringify(linksJson_));
 linksJson = linksJson.default;
+// console.log("linksJson: ",linksJson);
 let linksObj, objIndex;
 let foundLinksObj = linksJson.filter((obj, index) => {
   if (
@@ -27,16 +29,17 @@ if (foundLinksObj && foundLinksObj.length) {
   console.log("Links objext found");
   linksObj = foundLinksObj[0];
 } else {
-  console.log("Links object not found");
+  console.log("Links not found for this meta");
   objIndex = linksJson.length;
   linksObj = { URL: metaData.URL, Tags: metaData.Tags, links: [] };
   // console.log(Array.isArray(linksObj));
 }
 
-console.log(metaData, "\n\n\n");
+// console.log(metaData, "\n\n\n");
 
 const URL = metaData.URL;
 const Tags = metaData.Tags;
+console.log(`URL: ${URL} \nTags:${Tags}`);
 let lastLink;
 const getLinks = (htmlText) => {
   let urlHtml = cheerio.load(htmlText);
@@ -72,6 +75,7 @@ function checkLink(link) {
 }
 
 for (let i = 1; i <= Infinity; i += 1) {
+  console.log(`Current page: ${i}`);
   let currentPageUrl = "";
   if (
     URL.includes("search") ||
@@ -127,6 +131,8 @@ for (let i = 1; i <= Infinity; i += 1) {
       // );
     }
     console.log("\t\t", filteredLinks.join("\n\t\t"));
+  } else {
+    console.log("No filtered links");
   }
   if (
     Urls.length == 0

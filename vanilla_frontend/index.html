@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>URL App</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>URL App</h1>
+
+  <form id="urlForm">
+    <label for="urlInput">URL:</label>
+    <input type="text" id="urlInput" placeholder="Enter URL" required />
+
+    <label for="tagsInput">Tags:</label>
+    <input type="text" id="tagsInput" placeholder="Enter tags" />
+
+    <div id="tagsContainer">
+      <!-- The added tags will be dynamically displayed here -->
+    </div>
+
+    <input type="submit" value="Submit" />
+  </form>
+
+  <div id="result">
+    <!-- The response will be dynamically populated here -->
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
