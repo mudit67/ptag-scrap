@@ -30,11 +30,12 @@ app.get("/", async (req, res) => {
 
 // Route for handling POST requests
 app.post("/getLinks", async (req, res) => {
-  const url = req.body.url;
-  const tags = req.body.tags;
+  const { url, tags, currentPage } = req.body;
   console.log(url);
-  const fetchedLinks = await fetchUrls(url, tags);
-
+  const fetchedLinks = await fetchUrls(url, tags, currentPage);
+  if (fetchedLinks.err) {
+    return res.status(400).json({ err: "No more pages" });
+  }
   res.json(fetchedLinks);
 });
 

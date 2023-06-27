@@ -11,7 +11,7 @@ linksJson = linksJson.default;
 
 let lastLink;
 
-export default async function fetchUrls(URL, tags) {
+export default async function fetchUrls(URL, tags, page) {
   return new Promise(async (resolve_fetchUrls, reject) => {
     let linksObj,
       objIndex,
@@ -35,8 +35,8 @@ export default async function fetchUrls(URL, tags) {
       objIndex = linksJson.length;
       linksObj = { URL: URL, tags: tags, links: [] };
     }
-    const StartPage = 1;
-    const Endpage = 1;
+    const StartPage = page * 5 + 1;
+    const Endpage = StartPage + 4;
     for (let i = StartPage; i <= Endpage; i += 1) {
       console.log(`Current page: ${i}`);
       let currentPageUrl = "";
@@ -49,11 +49,21 @@ export default async function fetchUrls(URL, tags) {
       } else {
         currentPageUrl = `${URL}/${i}`;
       }
-      // console.log(`fetching: ${currentPageUrl}`);
       const pageHtmlText = await fetch(`${currentPageUrl}`).then((data) =>
         data.text()
       );
-
+      let $currentPage = cheerio.load(pageHtmlText);
+      let paginationPrev = $currentPage(".pagination-previous span").text();
+      let paginationNext = $currentPage(".pagination-next span").text();
+      if (!(paginationNext || paginationPrev)) {
+        if (i == StartPage) {
+          resolve_fetchUrls({ err: "No more pages" });
+          break;
+        } else {
+          i = Endpage;
+        }
+      }
+      // console.log("🚀 paginationNext:", paginationNext, currentPageUrl);
       let Urls = getLinks(pageHtmlText);
 
       let filteredLinks = await Promise.all(
@@ -63,9 +73,8 @@ export default async function fetchUrls(URL, tags) {
             return await checkLink(vidLink, imageLink);
           }
         })
-      ).then((i) => {
-        resolve_fetchUrls(resArray);
-        return i;
+      ).then((item) => {
+        return item;
       });
       filteredLinks = filteredLinks.filter((link) => {
         return link !== false;
@@ -120,7 +129,6 @@ export default async function fetchUrls(URL, tags) {
 
     function checkLink(link, imageLink) {
       return new Promise(async (resolve, reject) => {
-        console.log(`Fetching: ${(link, imageLink)}`);
         const data = await fetch(link)
           .then((a) => a.text())
           .catch((err) => {
@@ -144,11 +152,11 @@ export default async function fetchUrls(URL, tags) {
             link: link,
             imageLink,
           });
-          console.log(`${link} added ${resArray.length}`);
           resolve(link);
         }
         resolve(false);
       });
     }
+    resolve_fetchUrls(resArray);
   });
 }

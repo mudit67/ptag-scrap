@@ -1,6 +1,12 @@
 // Store the added tags in an array
 const tagsArray = [];
-
+const urlInput = document.getElementById("urlInput");
+const resultContainer = document.getElementById("result");
+let currentPage = 0;
+urlInput.onchange = () => {
+  console.log("url changed");
+  clearResults();
+};
 // Function to handle adding tags
 function addTag(event) {
   if (event.key === "Enter") {
@@ -20,6 +26,7 @@ function addTag(event) {
 
 // Function to update the tags container with the added tags
 function updateTagsContainer() {
+  clearResults();
   const tagsContainer = document.getElementById("tagsContainer");
   tagsContainer.innerHTML = ""; // Clear previous tags
 
@@ -42,19 +49,7 @@ function updateTagsContainer() {
 document.getElementById("tagsInput").addEventListener("keydown", addTag);
 
 // Function to handle form submission
-function submitForm(event) {
-  event.preventDefault(); // Prevent the default form submission
-
-  // Get the input values
-  const url = document.getElementById("urlInput").value;
-  const tags = tagsArray; // Use the updated tags array
-
-  // Create the request payload
-  const payload = {
-    url,
-    tags,
-  };
-
+function fetchData(payload) {
   // Make a POST request to the backend
   fetch("/getLinks", {
     method: "POST",
@@ -66,19 +61,44 @@ function submitForm(event) {
     .then((response) => response.json())
     .then((data) => {
       // Process the response data and update the UI
-      console.log(data);
+      // console.log(data);
+      if (data.err) {
+        if (data.err == "No more pages") {
+          console.log(data);
+          const showMoreBar = document.querySelector("div.foot_nav");
+          showMoreBar.remove();
+        }
+        return;
+      }
+      currentPage += 1;
       displayResult(data);
     })
     .catch((error) => {
       console.error("Error:", error);
     });
 }
+function submitForm(event) {
+  event.preventDefault(); // Prevent the default form submission
+
+  // Get the input values
+  let url = urlInput.value;
+  const tags = tagsArray; // Use the updated tags array
+
+  // Create the request payload
+  const payload = {
+    url,
+    tags,
+    currentPage,
+  };
+  fetchData(payload);
+}
 
 // Function to display the result on the UI
+function clearResults() {
+  currentPage = 0;
+  resultContainer.innerHTML = "";
+}
 function displayResult(data) {
-  const resultContainer = document.getElementById("result");
-  resultContainer.innerHTML = ""; // Clear previous results
-
   data.forEach((item) => {
     const title = item.title;
     const updatedTags = item.updatedTags;
@@ -116,6 +136,29 @@ function displayResult(data) {
     // Append the card to the result container
     resultContainer.appendChild(cardElement);
   });
+  if (!document.querySelector("div.foot_nav")) {
+    const showMoreBar = document.createElement("div");
+    showMoreBar.classList.add("foot_nav");
+    const showMoreButton = document.createElement("button");
+    showMoreButton.innerHTML = "Show More";
+    showMoreButton.onclick = function (e) {
+      e.preventDefault();
+      let payload = {
+        url: urlInput.value,
+        tags: tagsArray,
+        currentPage,
+      };
+      fetchData(payload);
+    };
+    showMoreBar.appendChild(showMoreButton);
+    resultContainer.appendChild(showMoreBar);
+  } else {
+    const showMoreBar = document.querySelector("div.foot_nav");
+    resultContainer.insertBefore(
+      showMoreBar,
+      resultContainer.lastChild.nextSibling
+    );
+  }
 }
 
 // Attach event listener to the form submit event

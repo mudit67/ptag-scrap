@@ -71,7 +71,7 @@ input[type="submit"]:hover {
 /* Grid view container */
 #result {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat( auto-fit, minmax(300px, 1fr) );
   grid-gap: 20px;
 }
 
@@ -96,4 +96,10 @@ input[type="submit"]:hover {
   max-width: 100%;
   height: auto;
   margin-top: 10px;
+}
+.foot_nav{
+  width: 100%;
+  display: flex;
+  grid-column: 1 /-1;
+  justify-content: center;
 }
