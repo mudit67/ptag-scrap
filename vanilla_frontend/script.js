@@ -23,14 +23,21 @@ function updateTagsContainer() {
   const tagsContainer = document.getElementById("tagsContainer");
   tagsContainer.innerHTML = ""; // Clear previous tags
 
-  tagsArray.forEach((tag) => {
+  tagsArray.forEach((tag, index) => {
     const tagElement = document.createElement("span");
     tagElement.textContent = tag;
+    tagElement.dataset.index = index; // Set a data attribute with the index
+
+    // Add click event listener to delete the tag
+    tagElement.addEventListener("click", (event) => {
+      const clickedIndex = event.target.dataset.index;
+      tagsArray.splice(clickedIndex, 1); // Remove the tag from the array
+      updateTagsContainer(); // Update the UI to reflect the changes
+    });
 
     tagsContainer.appendChild(tagElement);
   });
 }
-
 // Attach event listener to the input keydown event
 document.getElementById("tagsInput").addEventListener("keydown", addTag);
 
@@ -76,19 +83,38 @@ function displayResult(data) {
     const title = item.title;
     const updatedTags = item.updatedTags;
     const imageLink = item.imageLink;
+    const link = item.link; // New property for the link
 
+    // Create a card element
+    const cardElement = document.createElement("div");
+    cardElement.classList.add("card");
+
+    // Create a title element
     const titleElement = document.createElement("h3");
-    titleElement.textContent = title;
+    const linkElement = document.createElement("a");
+    linkElement.href = link; // Set the link URL
+    linkElement.target = "_blank"; // Open the link in a new tab
+    linkElement.textContent = title;
 
+    titleElement.appendChild(linkElement);
+
+    // Create a tags element
     const tagsElement = document.createElement("p");
     tagsElement.textContent = "Updated tags: " + updatedTags.join(", ");
 
+    // Create an image element
     const imageElement = document.createElement("p");
-    imageElement.innerHTML = 'Image: <img src="' + imageLink + '">';
+    const imageLinkElement = document.createElement("img");
+    imageLinkElement.src = imageLink;
+    imageElement.appendChild(imageLinkElement);
 
-    resultContainer.appendChild(titleElement);
-    resultContainer.appendChild(tagsElement);
-    resultContainer.appendChild(imageElement);
+    // Append elements to the card
+    cardElement.appendChild(titleElement);
+    cardElement.appendChild(tagsElement);
+    cardElement.appendChild(imageElement);
+
+    // Append the card to the result container
+    resultContainer.appendChild(cardElement);
   });
 }
 
