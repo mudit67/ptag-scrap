@@ -12,6 +12,7 @@ linksJson = linksJson.default;
 let lastLink;
 
 export default async function fetchUrls(URL, tags, page) {
+  console.log("🚀 tags:", tags);
   return new Promise(async (resolve_fetchUrls, reject) => {
     let linksObj,
       objIndex,
@@ -40,7 +41,9 @@ export default async function fetchUrls(URL, tags, page) {
     for (let i = StartPage; i <= Endpage; i += 1) {
       console.log(`Current page: ${i}`);
       let currentPageUrl = "";
-      if (
+      if (i == 1) {
+        currentPageUrl = URL;
+      } else if (
         URL.includes("search") ||
         URL.includes("model") ||
         URL.includes("channel")
@@ -56,14 +59,14 @@ export default async function fetchUrls(URL, tags, page) {
       let paginationPrev = $currentPage(".pagination-previous span").text();
       let paginationNext = $currentPage(".pagination-next span").text();
       if (!(paginationNext || paginationPrev)) {
-        if (i == StartPage) {
+        if (i == StartPage && i != 1) {
           resolve_fetchUrls({ err: "No more pages" });
           break;
         } else {
           i = Endpage;
         }
       }
-      // console.log("🚀 paginationNext:", paginationNext, currentPageUrl);
+      console.log("🚀 paginationNext:", paginationNext, currentPageUrl);
       let Urls = getLinks(pageHtmlText);
 
       let filteredLinks = await Promise.all(
@@ -79,6 +82,7 @@ export default async function fetchUrls(URL, tags, page) {
       filteredLinks = filteredLinks.filter((link) => {
         return link !== false;
       });
+      // console.log("🚀 ~ file: index.js:82 ~ filteredLinks:", filteredLinks);
       if (filteredLinks.length) {
         if (!filteredLinks.every((i) => linksObj.links.includes(i))) {
           let links = [...linksObj.links, ...filteredLinks];
@@ -115,15 +119,6 @@ export default async function fetchUrls(URL, tags, page) {
             vidUrls.push({ imageLink, vidLink });
           }
         });
-      // urlHtml("h5.title a")
-      //   .get()
-      //   .map((el) => {
-      //     const $el = urlHtml(el);
-      //     vidUrls.push({
-      //       vidLink: `https://daftsex.net${$el.attr("href")}`,
-      //       imageLink: "",
-      //     });
-      //   });
       return vidUrls;
     }
 
@@ -157,6 +152,7 @@ export default async function fetchUrls(URL, tags, page) {
         resolve(false);
       });
     }
+    // console.log("🚀 ~ file: index.js:162 ~ resArray:", resArray);
     resolve_fetchUrls(resArray);
   });
 }

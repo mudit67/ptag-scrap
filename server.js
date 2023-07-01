@@ -33,6 +33,7 @@ app.post("/getLinks", async (req, res) => {
   const { url, tags, currentPage } = req.body;
   console.log(url);
   const fetchedLinks = await fetchUrls(url, tags, currentPage);
+  // console.log("🚀 ~ file: server.js:36 ~ fetchedLinks:", fetchedLinks);
   if (fetchedLinks.err) {
     return res.status(400).json({ err: "No more pages" });
   }
