@@ -41,6 +41,9 @@ export default async function fetchUrls(URL, tags, page) {
     for (let i = StartPage; i <= Endpage; i += 1) {
       console.log(`Current page: ${i}`);
       let currentPageUrl = "";
+      if (URL.at(-1) == "/") {
+        URL = URL.substring(0, URL.length - 1);
+      }
       if (i == 1) {
         currentPageUrl = URL;
       } else if (
@@ -48,7 +51,7 @@ export default async function fetchUrls(URL, tags, page) {
         URL.includes("model") ||
         URL.includes("channel")
       ) {
-        currentPageUrl = `${URL}/&page=${i}`;
+        currentPageUrl = `${URL}&page=${i}`;
       } else {
         currentPageUrl = `${URL}/${i}`;
       }
