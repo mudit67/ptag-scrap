@@ -13,4 +13,4 @@ COPY . .
 EXPOSE 3000
 EXPOSE 8000
 
-CMD ["tail" ,"-F", "README.md"]
+CMD ["npm" ,"start"]
